@@ -62,25 +62,52 @@ void UART_putString(uint8_t* buf){
   }
 }
 
-void ledOn(int ledNumber){
-const uint8_t mask=(1<<7);
+void ledOn1(uint8_t* buf){
+const uint8_t pin1=(1<<7);
   // we configure the pin as output
-  UART_putString((uint8_t*)"Sono entrato");
-  DDRB |= mask;
-    if (PORTB==mask)
+  UART_putString((uint8_t*)"Hai acceso il pin ");
+  UART_putString(buf);
+  DDRB |= pin1;
+    if (PORTB==pin1)
       PORTB=0;
     else
-      PORTB=mask;
+      PORTB=pin1;
+}
+
+void ledOn2(uint8_t* buf){
+const uint8_t pin2=(1<<0);
+  // we configure the pin as output
+  UART_putString((uint8_t*)"Hai acceso il pin ");
+  UART_putString(buf);
+  DDRA |= pin2;
+    if (PORTA==pin2)
+      PORTA=0;
+    else
+      PORTA=pin2;
+}
+
+void ledOn3(uint8_t* buf){
+const uint8_t mask=(1<<2);
+  // we configure the pin as output
+  UART_putString((uint8_t*)"Hai acceso il pin ");
+  UART_putString(buf);
+  DDRA |= mask;
+    if (PORTA==mask)
+      PORTA=0;
+    else
+      PORTA=mask;
 }
 
 int main(void){
   UART_init();
-  UART_putString((uint8_t*)"write something, i'll repeat it\n");
+  //UART_putString((uint8_t*)"Arduino On");
   uint8_t buf[MAX_BUF];
   while(1) {
     UART_getString(buf);
-    UART_putString((uint8_t*)"hai scritto\n");
-    if(strncmp((char*)buf,"1\n",2)==0) ledOn(0);
+  //UART_putString((uint8_t*)"hai scritto\n");
+    if(strncmp((char*)buf,"1\n",2)==0) ledOn1(buf);
+    if(strncmp((char*)buf,"2\n",2)==0) ledOn2(buf);
+    if(strncmp((char*)buf,"3\n",2)==0) ledOn3(buf);
     UART_putString(buf);
   }
 }
