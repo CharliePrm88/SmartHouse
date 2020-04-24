@@ -6,6 +6,8 @@
 #define MAX_BUF 256
 #define BAUD 19600
 #define MYUBRR (F_CPU/16/BAUD-1)
+const uint8_t pin2=(1<<0);
+const uint8_t pin3=(1<<2);
 
 void UART_init(void){
   // Set baud rate
@@ -75,39 +77,42 @@ const uint8_t pin1=(1<<7);
 }
 
 void ledOn2(uint8_t* buf){
-const uint8_t pin2=(1<<0);
   // we configure the pin as output
-  UART_putString((uint8_t*)"Hai acceso il pin ");
-  UART_putString(buf);
-  DDRA |= pin2;
-    if (PORTA==pin2)
-      PORTA=0;
-    else
-      PORTA=pin2;
+    if (PORTA==pin2 || PORTA==(pin2|pin3)){
+        UART_putString((uint8_t*)"Si dovrebbe spegnere il pin giallo");
+      PORTA=PORTA-pin2;
+        }
+    else{
+      UART_putString((uint8_t*)"Hai acceso il pin ");
+      UART_putString(buf);
+      PORTA|=pin2;
+      }
 }
 
 void ledOn3(uint8_t* buf){
-const uint8_t mask=(1<<2);
   // we configure the pin as output
-  UART_putString((uint8_t*)"Hai acceso il pin ");
-  UART_putString(buf);
-  DDRA |= mask;
-    if (PORTA==mask)
-      PORTA=0;
-    else
-      PORTA=mask;
+  
+    if (PORTA==pin3 || PORTA==(pin2|pin3)){
+      UART_putString((uint8_t*)"Si dovrebbe spegnere il pin rosso");
+      PORTA=PORTA-pin3;
+        }
+    else{
+      UART_putString((uint8_t*)"Hai acceso il pin ");
+      UART_putString(buf);
+      PORTA|=pin3;
+  }
 }
 
 int main(void){
   UART_init();
+  DDRA |= pin2;
+  DDRA |= pin3;
   //UART_putString((uint8_t*)"Arduino On");
   uint8_t buf[MAX_BUF];
   while(1) {
     UART_getString(buf);
-  //UART_putString((uint8_t*)"hai scritto\n");
     if(strncmp((char*)buf,"1\n",2)==0) ledOn1(buf);
     if(strncmp((char*)buf,"2\n",2)==0) ledOn2(buf);
     if(strncmp((char*)buf,"3\n",2)==0) ledOn3(buf);
-    UART_putString(buf);
   }
 }
