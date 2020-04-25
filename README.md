@@ -1,5 +1,5 @@
-<title>Smarthouse in AVR Arduino</title>
-<h1>Progetto sistemi operativi 2019/2020</h1>
+<h1>Smarthouse in AVR Arduino</h1>
+<h2>Progetto sistemi operativi 2019/2020</h2>
 <h3>Requisiti<h3>
 1x Raspberry pi >=2 con Raspbian buster</br>
 1x Arduino Mega 2560</br>
