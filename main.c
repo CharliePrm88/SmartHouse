@@ -67,8 +67,8 @@ void UART_putString(uint8_t* buf){
 void ledOn1(uint8_t* buf){
 const uint8_t pin1=(1<<7);
   // we configure the pin as output
-  UART_putString((uint8_t*)"Hai acceso il pin ");
-  UART_putString(buf);
+  //UART_putString((uint8_t*)"Hai acceso il pin ");
+  //UART_putString(buf);
   DDRB |= pin1;
     if (PORTB==pin1)
       PORTB=0;
@@ -79,12 +79,12 @@ const uint8_t pin1=(1<<7);
 void ledOn2(uint8_t* buf){
   // we configure the pin as output
     if (PORTA==pin2 || PORTA==(pin2|pin3)){
-        UART_putString((uint8_t*)"Si dovrebbe spegnere il pin giallo");
+        //UART_putString((uint8_t*)"Si dovrebbe spegnere il pin giallo");
       PORTA=PORTA-pin2;
         }
     else{
-      UART_putString((uint8_t*)"Hai acceso il pin ");
-      UART_putString(buf);
+      //UART_putString((uint8_t*)"Hai acceso il pin ");
+      //UART_putString(buf);
       PORTA|=pin2;
       }
 }
@@ -93,12 +93,12 @@ void ledOn3(uint8_t* buf){
   // we configure the pin as output
   
     if (PORTA==pin3 || PORTA==(pin2|pin3)){
-      UART_putString((uint8_t*)"Si dovrebbe spegnere il pin rosso");
+      //UART_putString((uint8_t*)"Si dovrebbe spegnere il pin rosso");
       PORTA=PORTA-pin3;
         }
     else{
-      UART_putString((uint8_t*)"Hai acceso il pin ");
-      UART_putString(buf);
+      //UART_putString((uint8_t*)"Hai acceso il pin ");
+      //UART_putString(buf);
       PORTA|=pin3;
   }
 }
@@ -122,12 +122,13 @@ int analogPortA0()
 }
 
 void temp(){
-    float voltage,temperature,sensorVal;
+    //float voltage,temperature;
+    int sensorVal;
     sensorVal =analogPortA0();
-    printf("%3.1f", 1.0);
-    voltage= (sensorVal/1024)*5;
-    temperature=(voltage-0.5)*100;
-    printf("%3.1f",temperature);
+    printf("%d\n",sensorVal);
+    //voltage= (sensorVal/1024)*5;
+    //temperature=(voltage-0.5)*100;
+    //printf("%3.1f", temperature);
     }
 
 int main(void){
