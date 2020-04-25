@@ -8,6 +8,8 @@
 Inoltre:
 <code>sudo apt-get install arduino arduino-mk python-flask</code>
 
+<img src="static/Arduino.jpg" title="Arduino Mega 2560">
+
 <h3>ISTRUZIONI</h3>
 <ol>
 <li>Montare i dispositivi come in foto</li>
