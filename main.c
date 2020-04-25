@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <avr/io.h>
-
+#include "avr_common/uart.h"
 #define MAX_BUF 256
 #define BAUD 19600
 #define MYUBRR (F_CPU/16/BAUD-1)
@@ -103,7 +103,35 @@ void ledOn3(uint8_t* buf){
   }
 }
 
+int analogPortA0()
+{
+  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+  ADCSRB = 0;
+  ADMUX = 1 << REFS0;
+  ADMUX &= ~(1 << MUX4) & ~(1 << MUX3);
+  ADCSRA |= (1 << ADEN);
+  ADCSRB &= ~(1 << MUX5);
+  ADMUX &= ~(1 << MUX2) & ~(1 << MUX1) & ~(1 << MUX0);
+  uint8_t mask = 0;
+  mask |= (1 << ADSC);
+  ADCSRA |= (1 << ADSC);
+  while (ADCSRA & mask);
+  const uint8_t low = ADCL;
+  const uint8_t high = ADCH;
+  return (high << 8) | low;
+}
+
+void temp(){
+    float voltage,temperature,sensorVal;
+    sensorVal =analogPortA0();
+    printf("%3.1f", 1.0);
+    voltage= (sensorVal/1024)*5;
+    temperature=(voltage-0.5)*100;
+    printf("%3.1f",temperature);
+    }
+
 int main(void){
+  printf_init();
   UART_init();
   DDRA |= pin2;
   DDRA |= pin3;
@@ -114,5 +142,6 @@ int main(void){
     if(strncmp((char*)buf,"1\n",2)==0) ledOn1(buf);
     if(strncmp((char*)buf,"2\n",2)==0) ledOn2(buf);
     if(strncmp((char*)buf,"3\n",2)==0) ledOn3(buf);
+    temp();
   }
 }
