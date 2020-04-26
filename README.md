@@ -6,7 +6,7 @@
 <li>2x Led</li>
 <li>2x Resistenze da 220 ohm</li>
 <li>1x Sensore Temperatura TMP36
-  </ol></br>
+  </ul></br>
 Inoltre:
 <code>sudo apt-get install git arduino arduino-mk python3-flask</code>
 </br>
