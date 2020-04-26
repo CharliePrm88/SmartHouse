@@ -1,12 +1,14 @@
 <h1>Smarthouse in AVR Arduino</h1>
 <h2>Progetto sistemi operativi 2019/2020</h2>
-<h3>Requisiti<h3><ul>
+<h3>Requisiti</h3>
+<ul>
 <li>1x Raspberry pi >=2 con Raspbian buster</li>
 <li>1x Arduino Mega 2560</li>
 <li>2x Led</li>
 <li>2x Resistenze da 220 ohm</li>
-<li>1x Sensore Temperatura TMP36
-  </ul></br>
+<li>1x Sensore Temperatura TMP36</li>
+</ul>
+</br>
 Inoltre:
 <code>sudo apt-get install git arduino arduino-mk python3-flask</code>
 </br>
