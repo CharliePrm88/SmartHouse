@@ -23,6 +23,6 @@ Inoltre:
 </li>
 <li>Collegarsi all'indirizzo indicato sul terminale con un browser per eseguire i comandi</li>
 </ol>
-
+</br>
 Foto del prototipo
 <img src="static/Arduino.jpg" title="Arduino Mega 2560">
