@@ -143,7 +143,6 @@ void temp(){
         case '3': ledOn3(c);
         break;
         }
-    temp();
 }
 
 int main(void){
@@ -157,7 +156,7 @@ int main(void){
     /*UART_getString(buf);
     if(strncmp((char*)buf,"1\n",2)==0) ledOn1(buf);
     if(strncmp((char*)buf,"2\n",2)==0) ledOn2(buf);
-    if(strncmp((char*)buf,"3\n",2)==0) ledOn3(buf);
-    temp();*/
+    if(strncmp((char*)buf,"3\n",2)==0) ledOn3(buf);*/
+    temp();
   }
 }

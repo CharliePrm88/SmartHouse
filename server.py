@@ -22,15 +22,15 @@ def homepage():
 #POST
 	if request.method == 'POST':
 		if request.form.get('Luce1') and request.form.get('Luce2'):
-			arduinoSerialData.write('2\n')
+			arduinoSerialData.write('2')
 			time.sleep(0.1)
-			arduinoSerialData.write('3\n')
+			arduinoSerialData.write('3')
 			voltaggio=arduinoSerialData.readline();
 		elif request.form.get('Luce1'):
-			arduinoSerialData.write('2\n')
+			arduinoSerialData.write('2')
 			voltaggio=arduinoSerialData.readline();
 		elif request.form.get('Luce2'):
-			arduinoSerialData.write('3\n')
+			arduinoSerialData.write('3')
 			voltaggio=arduinoSerialData.readline();
 		temperatura=calcTemp(voltaggio)		
 		return redirect(url_for('homepage', temperatura=temperatura))
