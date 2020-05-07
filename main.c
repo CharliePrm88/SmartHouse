@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <avr/io.h>
-#include "avr_common/uart.h"
+#include <avr/interrupt.h>
+#include <stdbool.h>
+//#include "avr_common/uart.h"
 #define MAX_BUF 256
 #define BAUD 19600
 #define MYUBRR (F_CPU/16/BAUD-1)
@@ -13,11 +15,11 @@ void UART_init(void){
   // Set baud rate
   UBRR0H = (uint8_t)(MYUBRR>>8);
   UBRR0L = (uint8_t)MYUBRR;
-
   UCSR0C = (1<<UCSZ01) | (1<<UCSZ00); /* 8-bit data */ 
   UCSR0B = (1<<RXEN0) | (1<<TXEN0) | (1<<RXCIE0);   /* Enable RX and TX */  
-
-}
+  UCSR0B |= (1 << TXCIE0); 
+  sei();
+  }
 
 void UART_putChar(uint8_t c){
   // wait for transmission completed, looping on status bit
@@ -91,7 +93,6 @@ void ledOn2(uint8_t* buf){
 
 void ledOn3(uint8_t* buf){
   // we configure the pin as output
-  
     if (PORTA==pin3 || PORTA==(pin2|pin3)){
       //UART_putString((uint8_t*)"Si dovrebbe spegnere il pin rosso");
       PORTA=PORTA-pin3;
@@ -105,17 +106,17 @@ void ledOn3(uint8_t* buf){
 
 int analogPortA0()
 {
-  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); //ADCStatusRegister = Scelgo la porta da leggere
   ADCSRB = 0;
-  ADMUX = 1 << REFS0;
+  ADMUX = 1 << REFS0; //ADC Multiplexer Selection Register = Seleziono il registro
   ADMUX &= ~(1 << MUX4) & ~(1 << MUX3);
-  ADCSRA |= (1 << ADEN);
+  ADCSRA |= (1 << ADEN); //Enable la conversione
   ADCSRB &= ~(1 << MUX5);
   ADMUX &= ~(1 << MUX2) & ~(1 << MUX1) & ~(1 << MUX0);
   uint8_t mask = 0;
-  mask |= (1 << ADSC);
-  ADCSRA |= (1 << ADSC);
-  while (ADCSRA & mask);
+  mask |= (1 << ADSC); //inizia la conversione
+  ADCSRA |= (1 << ADSC); 
+  while (ADCSRA & mask); //while la conversione è terminata
   const uint8_t low = ADCL;
   const uint8_t high = ADCH;
   return (high << 8) | low;
@@ -130,6 +131,20 @@ void temp(){
     //temperature=(voltage-0.5)*100;
     //printf("%3.1f", temperature);
     }
+    
+    ISR(USART0_RX_vect)
+{
+    char c =UDR0;
+    switch(c){
+        case '1': ledOn1(c);
+        break;
+        case '2': ledOn2(c);
+        break;
+        case '3': ledOn3(c);
+        break;
+        }
+    temp();
+}
 
 int main(void){
   printf_init();
@@ -139,10 +154,10 @@ int main(void){
   //UART_putString((uint8_t*)"Arduino On");
   uint8_t buf[MAX_BUF];
   while(1) {
-    UART_getString(buf);
+    /*UART_getString(buf);
     if(strncmp((char*)buf,"1\n",2)==0) ledOn1(buf);
     if(strncmp((char*)buf,"2\n",2)==0) ledOn2(buf);
     if(strncmp((char*)buf,"3\n",2)==0) ledOn3(buf);
-    temp();
+    temp();*/
   }
 }
