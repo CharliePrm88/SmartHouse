@@ -4,7 +4,6 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdbool.h>
-//#include "avr_common/uart.h"
 #define MAX_BUF 256
 #define BAUD 19600
 #define MYUBRR (F_CPU/16/BAUD-1)
@@ -21,56 +20,8 @@ void UART_init(void){
   sei();
   }
 
-void UART_putChar(uint8_t c){
-  // wait for transmission completed, looping on status bit
-  while ( !(UCSR0A & (1<<UDRE0)) );
-
-  // Start transmission
-  UDR0 = c;
-}
-
-uint8_t UART_getChar(void){
-  // Wait for incoming data, looping on status bit
-  while ( !(UCSR0A & (1<<RXC0)) );
-  
-  // Return the data
-  return UDR0;
-    
-}
-
-// reads a string until the first newline or 0
-// returns the size read
-uint8_t UART_getString(uint8_t* buf){
-  uint8_t* b0=buf; //beginning of buffer
-  while(1){
-    uint8_t c=UART_getChar();
-    *buf=c;
-    ++buf;
-    // reading a 0 terminates the string
-    if (c==0)
-      return buf-b0;
-    // reading a \n  or a \r return results
-    // in forcedly terminating the string
-    if(c=='\n'||c=='\r'){
-      *buf=0;
-      ++buf;
-      return buf-b0;
-    }
-  }
-}
-
-void UART_putString(uint8_t* buf){
-  while(*buf){
-    UART_putChar(*buf);
-    ++buf;
-  }
-}
-
-void ledOn1(uint8_t* buf){
+void ledOn1(){
 const uint8_t pin1=(1<<7);
-  // we configure the pin as output
-  //UART_putString((uint8_t*)"Hai acceso il pin ");
-  //UART_putString(buf);
   DDRB |= pin1;
     if (PORTB==pin1)
       PORTB=0;
@@ -78,28 +29,20 @@ const uint8_t pin1=(1<<7);
       PORTB=pin1;
 }
 
-void ledOn2(uint8_t* buf){
-  // we configure the pin as output
+void ledOn2(){
     if (PORTA==pin2 || PORTA==(pin2|pin3)){
-        //UART_putString((uint8_t*)"Si dovrebbe spegnere il pin giallo");
-      PORTA=PORTA-pin2;
+        PORTA=PORTA-pin2;
         }
     else{
-      //UART_putString((uint8_t*)"Hai acceso il pin ");
-      //UART_putString(buf);
       PORTA|=pin2;
       }
 }
 
-void ledOn3(uint8_t* buf){
-  // we configure the pin as output
+void ledOn3(){
     if (PORTA==pin3 || PORTA==(pin2|pin3)){
-      //UART_putString((uint8_t*)"Si dovrebbe spegnere il pin rosso");
       PORTA=PORTA-pin3;
         }
     else{
-      //UART_putString((uint8_t*)"Hai acceso il pin ");
-      //UART_putString(buf);
       PORTA|=pin3;
   }
 }
@@ -123,13 +66,17 @@ int analogPortA0()
 }
 
 void temp(){
-    //float voltage,temperature;
+    char tempc[5];
+    float voltage,temperature;
     int sensorVal;
     sensorVal =analogPortA0();
-    printf("%d\n",sensorVal);
-    //voltage= (sensorVal/1024)*5;
-    //temperature=(voltage-0.5)*100;
-    //printf("%3.1f", temperature);
+    voltage= (sensorVal/1024.0f)*5.0f;
+    temperature=(voltage-0.5f)*100.0f;
+    dtostrf( temperature, 2, 1, tempc );
+    for(int i=0; i<4; i++) {
+        while ( !(UCSR0A & (1<<UDRE0)) );
+        UDR0 = tempc[i];
+        }
     }
     
     ISR(USART0_RX_vect)
@@ -143,6 +90,7 @@ void temp(){
         case '3': ledOn3(c);
         break;
         }
+    temp();
 }
 
 int main(void){
@@ -150,13 +98,11 @@ int main(void){
   UART_init();
   DDRA |= pin2;
   DDRA |= pin3;
-  //UART_putString((uint8_t*)"Arduino On");
-  uint8_t buf[MAX_BUF];
   while(1) {
     /*UART_getString(buf);
     if(strncmp((char*)buf,"1\n",2)==0) ledOn1(buf);
     if(strncmp((char*)buf,"2\n",2)==0) ledOn2(buf);
     if(strncmp((char*)buf,"3\n",2)==0) ledOn3(buf);*/
-    temp();
+    
   }
 }
