@@ -174,15 +174,17 @@ void temp(void){
     ISR(USART0_RX_vect)
 {
       char c=UDR0;
-      bufferpointer++;
       buffer[bufferpointer]=c;
+      bufferpointer++;
+
     if (bufferpointer>=sizeof(buffer))	{bufferpointer = 0;}
-    if (bufferpointer>=5){  printf("%s",&buffer); ledOn3();}
+    printf("%s\n",buffer); 
+    ledOn3();
 }
 
 /****************************************************************
  *                    Main                                      *
- * *************************************************************/
+ * **********************irvi***************************************/
 
 int main(void){
   UART_init();
