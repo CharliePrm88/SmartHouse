@@ -25,14 +25,13 @@ char EEMEM nomeStanza2[20];
 char EEMEM nomeStanza3[20];
 uint8_t EEMEM tempoAcquisizione = 5;
 int bufferpointer=0;
-char buffer[100];
+char buffer[25];
 
 /*********************************************************************
  *                    Pacchetti                                      *
  * ******************************************************************/
 
 struct casa{
-	char header[14];
 	char nome[20];
 	char led1[20];
 	char led2[20];
@@ -175,16 +174,16 @@ void temp(void){
 {
       char c=UDR0;
       buffer[bufferpointer]=c;
+      printf("%i %s\n",bufferpointer,buffer);
       bufferpointer++;
 
     if (bufferpointer>=sizeof(buffer))	{bufferpointer = 0;}
-    printf("%s\n",buffer); 
-    ledOn3();
+     
 }
 
 /****************************************************************
  *                    Main                                      *
- * **********************irvi***************************************/
+ * *************************************************************/
 
 int main(void){
   UART_init();
@@ -192,6 +191,5 @@ int main(void){
   DDRA |= pin2;
   DDRA |= pin3;
   while(1) {
-    
   }
 }
