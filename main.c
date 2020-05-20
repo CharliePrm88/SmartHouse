@@ -23,7 +23,7 @@ char EEMEM nomeCasa[20];
 char EEMEM nomeStanza1[20];
 char EEMEM nomeStanza2[20];
 char EEMEM nomeStanza3[20];
-uint8_t EEMEM tempoAcquisizione = 5;
+uint16_t EEMEM tempoAcquisizione = 5;
 int bufferpointer=0;
 char buffer[25];
 
@@ -31,14 +31,18 @@ char buffer[25];
  *                    Pacchetti                                      *
  * ******************************************************************/
 
-struct casa{
+typedef struct casa{
 	char nome[20];
 	char led1[20];
 	char led2[20];
 	char led3[20];
-	uint8_t tempo;
+	char tempo[20];
 } casa;
 
+typedef struct pacchetto{
+	char header[5];
+	char payload[20];
+	}pacchetto;
 /*********************************************************************
  *                    Funzioni                                       *
  * ******************************************************************/
@@ -122,63 +126,53 @@ void temp(void){
     /**************************************************************
      *                Work in progress                            *
      *************************************************************/
-    
-    
-    /*void newconfig(void){
-        //scrive sulla eeprom la nuova configurazione
-        casa nuovaCasa;
-        int c=0;
-        for(int i=14; i<34; i++){
-          nuovaCasa.nome[c] = buffer[i];
-          c++;
-          }
-          eeprom_update_block(nomeCasa,nuovaCasa.nome,20);
-          c=0;
-        for(int i=34; i<54; i++){
-          nuovaCasa.led1[c] = buffer[i];
-          c++;
-          }
-          c=0;
-          eeprom_update_block(nomeStanza1,nuovaCasa.led1,20);
-        for(int i=54; i<74; i++){
-          nuovaCasa.led2[c] = buffer[i];
-          c++;
-          }
-        c=0;
-        eeprom_update_block(nomeStanza2,nuovaCasa.led2,20);
-        for(int i=74; i<94; i++){
-          nuovaCasa.led3[c] = buffer[i];
-          c++;
-          }
-        eeprom_update_block(nomeStanza3,nuovaCasa.led3,20);
-        nuovaCasa.tempo=buffer[94];
-        eeprom_update_byte(&tempoAcquisizione,nuovaCasa.tempo);
-        }
-        
-    void sendConfig(void){
+     void sendConfig(void){
       casa vecchiaCasa;
-      _delay_ms(1000);
       eeprom_read_block(vecchiaCasa.nome,nomeCasa,20);
       eeprom_read_block(vecchiaCasa.led1,nomeStanza1,20);
       eeprom_read_block(vecchiaCasa.led2,nomeStanza2,20);
       eeprom_read_block(vecchiaCasa.led3,nomeStanza3,20);
-      strcpy(vecchiaCasa.header,"oldconfig");
-      for(int i=0; i<14; i++) UDR0=vecchiaCasa.header[i];
-      for(int i=0; i<20; i++) UDR0=vecchiaCasa.led1[i];
-      for(int i=0; i<20; i++) UDR0=vecchiaCasa.led2[i];
-      for(int i=0; i<20; i++) UDR0=vecchiaCasa.led3[i];
+      for(int i=0; i<20; i++){UDR0=vecchiaCasa.nome[i];_delay_ms(50);}
+      for(int i=0; i<20; i++){UDR0=vecchiaCasa.led1[i];_delay_ms(50);}
+      for(int i=0; i<20; i++){UDR0=vecchiaCasa.led2[i]; _delay_ms(50);}
+      for(int i=0; i<20; i++){UDR0=vecchiaCasa.led3[i]; _delay_ms(50);}
       }
-      */  
-    
+      
+    void gestorePacchettiIncoming(pacchetto packet){
+      if(strstr(packet.header,"hous")!=NULL){
+        eeprom_update_block(nomeCasa,packet.payload,20);
+        memset(buffer,0,sizeof(buffer));
+        }
+      else if (strstr(packet.header, "1roo")!=NULL){
+        eeprom_update_block(nomeStanza1,packet.payload,20);
+        memset(buffer,0,sizeof(buffer));
+        } 
+      else if (strstr(packet.header, "2roo")!=NULL){
+        eeprom_update_block(nomeStanza2,packet.payload,20);
+        memset(buffer,0,sizeof(buffer));
+        }
+      else if (strstr(packet.header, "3roo")!=NULL){
+        eeprom_update_block(nomeStanza3,packet.payload,20);
+        memset(buffer,0,sizeof(buffer));
+        }
+      else if (strstr(packet.header, "ctem")!=NULL){
+        eeprom_update_word(&tempoAcquisizione,atoi(packet.payload));
+        memset(buffer,0,sizeof(buffer));
+        }
+      else if(strstr(packet.header,"oldh")!=NULL){
+        sendConfig();
+        memset(buffer,0,sizeof(buffer));
+        }
+      }
+  
     ISR(USART0_RX_vect)
 {
       char c=UDR0;
       buffer[bufferpointer]=c;
-      printf("%i %s\n",bufferpointer,buffer);
+      //printf("%i %s\n",bufferpointer,buffer);
       bufferpointer++;
 
     if (bufferpointer>=sizeof(buffer))	{bufferpointer = 0;}
-     
 }
 
 /****************************************************************
@@ -186,10 +180,14 @@ void temp(void){
  * *************************************************************/
 
 int main(void){
+  pacchetto package;
   UART_init();
   printf_init();
   DDRA |= pin2;
   DDRA |= pin3;
   while(1) {
+    strncpy(package.header, &buffer[20], 4);
+    strncpy(package.payload, buffer, sizeof(package.payload));
+    gestorePacchettiIncoming(package);
   }
 }
