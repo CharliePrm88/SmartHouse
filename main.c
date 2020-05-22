@@ -127,6 +127,8 @@ void temp(void){
      *                Work in progress                            *
      *************************************************************/
      void sendConfig(void){
+      memset(buffer,0,sizeof(buffer));
+
       casa vecchiaCasa;
       eeprom_read_block(vecchiaCasa.nome,nomeCasa,20);
       eeprom_read_block(vecchiaCasa.led1,nomeStanza1,20);
@@ -136,33 +138,51 @@ void temp(void){
       for(int i=0; i<20; i++){UDR0=vecchiaCasa.led1[i];_delay_ms(50);}
       for(int i=0; i<20; i++){UDR0=vecchiaCasa.led2[i]; _delay_ms(50);}
       for(int i=0; i<20; i++){UDR0=vecchiaCasa.led3[i]; _delay_ms(50);}
+      char test[20];
+        eeprom_read_block(test,nomeCasa,sizeof(nomeCasa));
+        printf("read_block: %s\n",test);
+        eeprom_read_block(test,nomeStanza1,sizeof(nomeStanza1));
+        printf("read_block: %s\n",test);
+        eeprom_read_block(test,nomeStanza2,sizeof(nomeStanza2));
+        printf("read_block: %s\n",test);
+        eeprom_read_block(test,nomeStanza3,sizeof(nomeStanza3));
+        printf("read_block: %s\n",test);
+        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
       }
       
     void gestorePacchettiIncoming(pacchetto packet){
-      if(strstr(packet.header,"hous")!=NULL){
-        eeprom_update_block(nomeCasa,packet.payload,20);
+      if(strstr(packet.header,"hou")!=NULL){
+        eeprom_update_block(packet.payload,nomeCasa,sizeof(packet.payload));
         memset(buffer,0,sizeof(buffer));
+        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         }
       else if (strstr(packet.header, "1roo")!=NULL){
-        eeprom_update_block(nomeStanza1,packet.payload,20);
+        eeprom_update_block(packet.payload,nomeStanza1,sizeof(packet.payload));
         memset(buffer,0,sizeof(buffer));
+        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         } 
       else if (strstr(packet.header, "2roo")!=NULL){
-        eeprom_update_block(nomeStanza2,packet.payload,20);
+        eeprom_update_block(packet.payload,nomeStanza2,sizeof(packet.payload));
         memset(buffer,0,sizeof(buffer));
+        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         }
       else if (strstr(packet.header, "3roo")!=NULL){
-        eeprom_update_block(nomeStanza3,packet.payload,20);
+        eeprom_update_block(packet.payload,nomeStanza3,sizeof(packet.payload));
+        ledOn3();
         memset(buffer,0,sizeof(buffer));
+        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         }
       else if (strstr(packet.header, "ctem")!=NULL){
         eeprom_update_word(&tempoAcquisizione,atoi(packet.payload));
         memset(buffer,0,sizeof(buffer));
+        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         }
       else if(strstr(packet.header,"oldh")!=NULL){
         sendConfig();
-        memset(buffer,0,sizeof(buffer));
+        ledOn3();
         }
+     //printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
+
       }
   
     ISR(USART0_RX_vect)
@@ -186,8 +206,9 @@ int main(void){
   DDRA |= pin2;
   DDRA |= pin3;
   while(1) {
-    strncpy(package.header, &buffer[20], 4);
-    strncpy(package.payload, buffer, sizeof(package.payload));
+   // printf("%i %s\n",bufferpointer,buffer);
+    strlcpy(package.header, buffer+sizeof(package.payload), sizeof(package.header));
+    strlcpy(package.payload, buffer, sizeof(package.payload));
     gestorePacchettiIncoming(package);
-  }
+    }
 }

@@ -28,7 +28,6 @@ typedef struct pacchetto{
 	 * 				Funzioni di Supporto							  *
 	 * ***************************************************************/
 void inviaPacchetto(pacchetto package, int fd){
-	//Inserire lo sprintf per estendere il valore a 20 caratteri, fare un ciclo for per ogni attributo della struct
 	for(int i=0; i<sizeof(package.payload); i++){
 		char c=package.payload[i];
 		write(fd, &c, 1);
@@ -81,23 +80,11 @@ casa richiediConfigurazioneIniziale(int fd, casa Casa){
 	strcpy(packet.header, "oldho");
 	sprintf(packet.payload,"%-20s"," ");
 	inviaPacchetto(packet,fd);
-	char c=' ';
-	for(int i=0; i<sizeof(packet.payload);i++){
-		read(fd,&c,1);
-		strcat(Casa.nome, &c);
-		}
-	for(int i=0; i<sizeof(packet.payload);i++){
-		read(fd,&c,1);
-		strcat(Casa.led1, &c);
-		}
-	for(int i=0; i<sizeof(packet.payload);i++){
-		read(fd,&c,1);
-		strcat(Casa.led2, &c);
-		}
-	for(int i=0; i<sizeof(packet.payload);i++){
-		read(fd,&c,1);
-		strcat(Casa.led3, &c);
-		}
+	read(fd,Casa.nome,sizeof(packet.payload));
+	read(fd,Casa.led1,sizeof(packet.payload));
+	read(fd,Casa.led2,sizeof(packet.payload));
+	read(fd,Casa.led3,sizeof(packet.payload));
+	return Casa;
 	}
 
 float richiediTemperatura(int fd){
@@ -145,7 +132,7 @@ int main(int argc,char** argv){
 			
 			
 	//Richiedi i valori dalla eeprom e copiali in un typedef casa
-	richiediConfigurazioneIniziale(fd,Casa);
+	Casa=richiediConfigurazioneIniziale(fd,Casa);
 	
 	}
 	
@@ -157,7 +144,7 @@ int main(int argc,char** argv){
 	float temperatura;
 	while(strcmp(stanzaRichiesta,"x")!=0){
 		//richiedi la temperatura
-		printf("Benvenuto a %s. Digita \"x\" per uscire. Digita il nome di una stanza per accendere la luce. La temperatura attuale è di %f. \n Ti ricordo i nomi delle stanze:\n 1. %s \n 2. %s \n 3. %s\n", 
+		printf("Nome della casa: %s\nDigita \"x\" per uscire.\nDigita il nome di una stanza per accendere la luce.\nLa temperatura attuale è di %f. \nTi ricordo i nomi delle stanze:\n 1. %s \n 2. %s \n 3. %s\n", 
 											Casa.nome,temperatura, Casa.led1,Casa.led2,Casa.led3);
 		scanf("%s",stanzaRichiesta);
 		//write(fd,stanzaRichiesta,1);
