@@ -40,7 +40,7 @@ typedef struct casa{
 } casa;
 
 typedef struct pacchetto{
-	char header[5];
+	char header[6];
 	char payload[20];
 	}pacchetto;
 /*********************************************************************
@@ -153,29 +153,33 @@ void temp(void){
     void gestorePacchettiIncoming(pacchetto packet){
       if(strstr(packet.header,"hou")!=NULL){
         eeprom_update_block(packet.payload,nomeCasa,sizeof(packet.payload));
-        memset(buffer,0,sizeof(buffer));
+        
         printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
+        memset(buffer,0,sizeof(buffer));
         }
       else if (strstr(packet.header, "1roo")!=NULL){
         eeprom_update_block(packet.payload,nomeStanza1,sizeof(packet.payload));
-        memset(buffer,0,sizeof(buffer));
+        
         printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
+        memset(buffer,0,sizeof(buffer));
         } 
       else if (strstr(packet.header, "2roo")!=NULL){
         eeprom_update_block(packet.payload,nomeStanza2,sizeof(packet.payload));
-        memset(buffer,0,sizeof(buffer));
+        
         printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
+        memset(buffer,0,sizeof(buffer));
         }
       else if (strstr(packet.header, "3roo")!=NULL){
         eeprom_update_block(packet.payload,nomeStanza3,sizeof(packet.payload));
         ledOn3();
-        memset(buffer,0,sizeof(buffer));
+        
         printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
+        memset(buffer,0,sizeof(buffer));
         }
       else if (strstr(packet.header, "ctem")!=NULL){
         eeprom_update_word(&tempoAcquisizione,atoi(packet.payload));
-        memset(buffer,0,sizeof(buffer));
         printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
+        memset(buffer,0,sizeof(buffer));
         }
       else if(strstr(packet.header,"oldh")!=NULL){
         sendConfig();
@@ -190,7 +194,7 @@ void temp(void){
       char c=UDR0;
       buffer[bufferpointer]=c;
       //printf("%i %s\n",bufferpointer,buffer);
-      bufferpointer++;
+      bufferpointer+=1;
 
     if (bufferpointer>=sizeof(buffer))	{bufferpointer = 0;}
 }

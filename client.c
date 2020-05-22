@@ -20,7 +20,7 @@ typedef struct casa{
 } casa;
 
 typedef struct pacchetto{
-	char header[5];
+	char header[6];
 	char payload[20];
 	}pacchetto;
 	
@@ -28,12 +28,12 @@ typedef struct pacchetto{
 	 * 				Funzioni di Supporto							  *
 	 * ***************************************************************/
 void inviaPacchetto(pacchetto package, int fd){
-	for(int i=0; i<sizeof(package.payload); i++){
+	for(int i=0; i<strlen(package.payload); i++){
 		char c=package.payload[i];
 		write(fd, &c, 1);
 		usleep(50000);
 	  }
-	for(int i=0; i<sizeof(package.header); i++){
+	for(int i=0; i<strlen(package.header); i++){
 		char c=package.header[i];
 		write(fd, &c, 1);
 		usleep(50000);
@@ -74,7 +74,6 @@ casa configurazioneIniziale(casa Casa, int fd){
 	inviaPacchetto(package,fd);
 	return Casa;
 }
-	
 casa richiediConfigurazioneIniziale(int fd, casa Casa){
 	pacchetto packet;
 	strcpy(packet.header, "oldho");
