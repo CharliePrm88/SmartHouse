@@ -133,19 +133,12 @@ void temp(void){
       eeprom_read_block(vecchiaCasa.led1,nomeStanza1,20);
       eeprom_read_block(vecchiaCasa.led2,nomeStanza2,20);
       eeprom_read_block(vecchiaCasa.led3,nomeStanza3,20);
-      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.nome[i];_delay_ms(50);}
-      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.led1[i];_delay_ms(50);}
-      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.led2[i]; _delay_ms(50);}
-      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.led3[i]; _delay_ms(50);}
-      char test[20];
-        eeprom_read_block(test,nomeCasa,sizeof(nomeCasa));
-        printf("read_block: %sOK\n",test);
-        eeprom_read_block(test,nomeStanza1,sizeof(nomeStanza1));
-        printf("read_block: %s\n",test);
-        eeprom_read_block(test,nomeStanza2,sizeof(nomeStanza2));
-        printf("read_block: %s\n",test);
-        eeprom_read_block(test,nomeStanza3,sizeof(nomeStanza3));
-        printf("read_block: %s\n",test);
+      for(int i=0; i<sizeof(packet.payload); i++){while (!(UCSR0A & (1<<UDRE0))); UDR0=vecchiaCasa.nome[i];_delay_ms(50);}
+      for(int i=0; i<sizeof(packet.payload); i++){while (!(UCSR0A & (1<<UDRE0))); UDR0=vecchiaCasa.led1[i];_delay_ms(50);}
+      for(int i=0; i<sizeof(packet.payload); i++){while (!(UCSR0A & (1<<UDRE0))); UDR0=vecchiaCasa.led2[i]; _delay_ms(50);}
+      for(int i=0; i<sizeof(packet.payload); i++){while (!(UCSR0A & (1<<UDRE0))); UDR0=vecchiaCasa.led3[i]; _delay_ms(50);}
+      UDR0='\n';
+      bufferpointer=25;
       }
       
     void gestorePacchettiIncoming(pacchetto packet){
@@ -192,7 +185,6 @@ void temp(void){
       if (bufferpointer>25)	{bufferpointer = 0;}
       char c=UDR0;
       buffer[bufferpointer]=c;
-      //printf("%i %i\n",bufferpointer,strlen(buffer));
       bufferpointer+=1;
 
     
@@ -211,12 +203,9 @@ int main(void){
   ledOn1();
   ledOn1();
   bufferpointer=0;
-  //printf("%i %i",strlen(buffer), bufferpointer);
   while(1) {
-   // printf("%i %s\n",bufferpointer,buffer);
    memcpy(package.header, buffer+sizeof(package.payload), sizeof(package.header));
-    memcpy(package.payload, buffer, sizeof(package.payload));
-    //printf("%i %i",strlen(package.header),strlen(package.payload));
-    gestorePacchettiIncoming(package);
+   memcpy(package.payload, buffer, sizeof(package.payload));
+   gestorePacchettiIncoming(package);
     }
 }

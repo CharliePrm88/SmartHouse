@@ -146,7 +146,6 @@ int main(int argc,char** argv){
 	if(config=='y') { 
 		Casa=configurazioneIniziale(Casa,fd);
 	}else{		
-		//Richiedi i valori dalla eeprom e copiali in un typedef casa
 		Casa=richiediConfigurazioneIniziale(fd,Casa);
 	}
 	
@@ -158,13 +157,11 @@ int main(int argc,char** argv){
 	float temperatura;
 	pacchetto packet;
 	while(strcmp(stanzaRichiesta,"x")!=0){
+		//richiediTemperatura;
 		printf("Nome della casa: %s\nDigita \"x\" per uscire.\nDigita il nome di una stanza per accendere la luce.\nLa temperatura attuale è di %f. \nTi ricordo i nomi delle stanze:\n 1. %s \n 2. %s \n 3. %s\n", 
 											Casa.nome,temperatura, Casa.led1,Casa.led2,Casa.led3);
 		scanf("%s",stanzaRichiesta);
 		gestoreLuci(Casa,stanzaRichiesta,fd);
-		//richiediTemperatura;
-		//scrivi la stanzaRichiesta in un pacchetto
-		//invialo all'arduino
 	}
 	close(fd);
 	}
