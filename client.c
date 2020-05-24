@@ -23,61 +23,78 @@ typedef struct pacchetto{
 	char header[6];
 	char payload[20];
 	}pacchetto;
-	
+
+pacchetto packet;
 	/******************************************************************
 	 * 				Funzioni di Supporto							  *
 	 * ***************************************************************/
-void inviaPacchetto(pacchetto package, int fd){
-	for(int i=0; i<strlen(package.payload); i++){
-		char c=package.payload[i];
+void inviaPacchetto(pacchetto packet, int fd){
+	for(int i=0; i<sizeof(packet.payload); i++){
+		char c=packet.payload[i];
 		write(fd, &c, 1);
 		usleep(50000);
 	  }
-	for(int i=0; i<strlen(package.header); i++){
-		char c=package.header[i];
+	for(int i=0; i<sizeof(packet.header); i++){
+		char c=packet.header[i];
 		write(fd, &c, 1);
 		usleep(50000);
-		}  
+		}
+		
+	}
+
+void gestoreLuci(casa Casa, char *stanzaRichiesta, int fd){
+	strcpy(packet.payload," ");
+	sprintf(packet.payload,"%-19s"," ");
+	if(strstr(Casa.led1,stanzaRichiesta)!=NULL){
+		strcpy(packet.header,"1leds");
+		inviaPacchetto(packet,fd);
+		}
+	if(strstr(Casa.led2,stanzaRichiesta)!=NULL){
+		strcpy(packet.header,"2leds");
+		inviaPacchetto(packet,fd);
+		}
+	if(strstr(Casa.led3,stanzaRichiesta)!=NULL){
+		strcpy(packet.header,"3leds");
+		inviaPacchetto(packet,fd);
+		}
 	}
 
 casa configurazioneIniziale(casa Casa, int fd){
-	pacchetto package;
 	//Casa
 	printf("Inserisci il nome della casa: ");	
 	scanf("%s",&Casa.nome);
-	strcpy(package.header,"house");
-	sprintf(package.payload,"%-20s",Casa.nome);
-	inviaPacchetto(package,fd);
+	strcpy(packet.header, "house");
+	sprintf(packet.payload,"%-19s",Casa.nome);
+	inviaPacchetto(packet,fd);
 	//Stanza1
 	printf("Inserisci il nome della stanza n°1: ");
 	scanf("%s",&Casa.led1);
-	strcpy(package.header,"1room");
-	sprintf(package.payload,"%-20s",Casa.led1);
-	inviaPacchetto(package,fd);
+	strcpy(packet.header,"1room");
+	sprintf(packet.payload,"%-19s",Casa.led1);	
+	inviaPacchetto(packet,fd);
 	//Stanza2
 	printf("Inserisci il nome della stanza n°2: ");
 	scanf("%s",&Casa.led2);
-	strcpy(package.header,"2room");
-	sprintf(package.payload,"%-20s",Casa.led2);
-	inviaPacchetto(package,fd);
+	strcpy(packet.header,"2room");
+	sprintf(packet.payload,"%-19s",Casa.led2);
+	inviaPacchetto(packet,fd);
 	//Stanza3
 	printf("Inserisci il nome della stanza n°3: ");
 	scanf("%s",&Casa.led3);
-	strcpy(package.header,"3room");
-	sprintf(package.payload,"%-20s",Casa.led3);
-	inviaPacchetto(package,fd);
+	strcpy(packet.header,"3room");
+	sprintf(packet.payload,"%-19s",Casa.led3);
+	inviaPacchetto(packet,fd);
 	//Tempo Di acquisizione temperatura
 	printf("Ogni quanti secondi vuoi rilevare la temperatura? ");
 	scanf("%s",&Casa.tempo);
-	strcpy(package.header,"ctemp");
-	sprintf(package.payload,"%-20s",Casa.tempo);
-	inviaPacchetto(package,fd);
+	strcpy(packet.header,"ctemp");
+	sprintf(packet.payload,"%-19s",Casa.tempo);
+	inviaPacchetto(packet,fd);
 	return Casa;
 }
 casa richiediConfigurazioneIniziale(int fd, casa Casa){
-	pacchetto packet;
 	strcpy(packet.header, "oldho");
-	sprintf(packet.payload,"%-20s"," ");
+	sprintf(packet.payload,"%-19s"," ");
 	inviaPacchetto(packet,fd);
 	read(fd,Casa.nome,sizeof(packet.payload));
 	read(fd,Casa.led1,sizeof(packet.payload));
@@ -117,6 +134,7 @@ int main(int argc,char** argv){
 	tty.c_iflag &= ~(IXON | IXOFF | IXANY);
 	tty.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 	tty.c_oflag &= ~OPOST;
+	tty.c_cc[VTIME] = 10;
 	if((tcsetattr(fd,TCSANOW,&tty)) != 0) perror("error setting attributes");
 	
 	/*************************************************************************
@@ -127,12 +145,9 @@ int main(int argc,char** argv){
 	scanf("%c",&config);
 	if(config=='y') { 
 		Casa=configurazioneIniziale(Casa,fd);
-		}else{
-			
-			
-	//Richiedi i valori dalla eeprom e copiali in un typedef casa
-	Casa=richiediConfigurazioneIniziale(fd,Casa);
-	
+	}else{		
+		//Richiedi i valori dalla eeprom e copiali in un typedef casa
+		Casa=richiediConfigurazioneIniziale(fd,Casa);
 	}
 	
 	/***************************************************************************
@@ -141,13 +156,13 @@ int main(int argc,char** argv){
 	 
 	char stanzaRichiesta[20]="c";
 	float temperatura;
+	pacchetto packet;
 	while(strcmp(stanzaRichiesta,"x")!=0){
-		//richiedi la temperatura
 		printf("Nome della casa: %s\nDigita \"x\" per uscire.\nDigita il nome di una stanza per accendere la luce.\nLa temperatura attuale è di %f. \nTi ricordo i nomi delle stanze:\n 1. %s \n 2. %s \n 3. %s\n", 
 											Casa.nome,temperatura, Casa.led1,Casa.led2,Casa.led3);
 		scanf("%s",stanzaRichiesta);
-		//write(fd,stanzaRichiesta,1);
-		
+		gestoreLuci(Casa,stanzaRichiesta,fd);
+		//richiediTemperatura;
 		//scrivi la stanzaRichiesta in un pacchetto
 		//invialo all'arduino
 	}

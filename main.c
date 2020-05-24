@@ -46,6 +46,7 @@ typedef struct pacchetto{
 /*********************************************************************
  *                    Funzioni                                       *
  * ******************************************************************/
+casa vecchiaCasa;
 
 void UART_init(void){
   // Set baud rate
@@ -126,77 +127,75 @@ void temp(void){
     /**************************************************************
      *                Work in progress                            *
      *************************************************************/
-     void sendConfig(void){
+     void sendConfig(pacchetto packet){
       memset(buffer,0,sizeof(buffer));
-
-      casa vecchiaCasa;
       eeprom_read_block(vecchiaCasa.nome,nomeCasa,20);
       eeprom_read_block(vecchiaCasa.led1,nomeStanza1,20);
       eeprom_read_block(vecchiaCasa.led2,nomeStanza2,20);
       eeprom_read_block(vecchiaCasa.led3,nomeStanza3,20);
-      for(int i=0; i<20; i++){UDR0=vecchiaCasa.nome[i];_delay_ms(50);}
-      for(int i=0; i<20; i++){UDR0=vecchiaCasa.led1[i];_delay_ms(50);}
-      for(int i=0; i<20; i++){UDR0=vecchiaCasa.led2[i]; _delay_ms(50);}
-      for(int i=0; i<20; i++){UDR0=vecchiaCasa.led3[i]; _delay_ms(50);}
+      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.nome[i];_delay_ms(50);}
+      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.led1[i];_delay_ms(50);}
+      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.led2[i]; _delay_ms(50);}
+      for(int i=0; i<sizeof(packet.payload); i++){UDR0=vecchiaCasa.led3[i]; _delay_ms(50);}
       char test[20];
         eeprom_read_block(test,nomeCasa,sizeof(nomeCasa));
-        printf("read_block: %s\n",test);
+        printf("read_block: %sOK\n",test);
         eeprom_read_block(test,nomeStanza1,sizeof(nomeStanza1));
         printf("read_block: %s\n",test);
         eeprom_read_block(test,nomeStanza2,sizeof(nomeStanza2));
         printf("read_block: %s\n",test);
         eeprom_read_block(test,nomeStanza3,sizeof(nomeStanza3));
         printf("read_block: %s\n",test);
-        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
       }
       
     void gestorePacchettiIncoming(pacchetto packet){
-      if(strstr(packet.header,"hou")!=NULL){
+      if(strstr(packet.header,"house")!=NULL){
         eeprom_update_block(packet.payload,nomeCasa,sizeof(packet.payload));
-        
-        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         memset(buffer,0,sizeof(buffer));
         }
-      else if (strstr(packet.header, "1roo")!=NULL){
+      else if (strstr(packet.header,"1room")!=NULL){
         eeprom_update_block(packet.payload,nomeStanza1,sizeof(packet.payload));
-        
-        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         memset(buffer,0,sizeof(buffer));
         } 
-      else if (strstr(packet.header, "2roo")!=NULL){
+      else if (strstr(packet.header, "2room")!=NULL){
         eeprom_update_block(packet.payload,nomeStanza2,sizeof(packet.payload));
-        
-        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         memset(buffer,0,sizeof(buffer));
         }
-      else if (strstr(packet.header, "3roo")!=NULL){
+      else if (strstr(packet.header, "3room")!=NULL){
         eeprom_update_block(packet.payload,nomeStanza3,sizeof(packet.payload));
-        ledOn3();
-        
-        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         memset(buffer,0,sizeof(buffer));
         }
-      else if (strstr(packet.header, "ctem")!=NULL){
+      else if (strstr(packet.header, "ctemp")!=NULL){
         eeprom_update_word(&tempoAcquisizione,atoi(packet.payload));
-        printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
         memset(buffer,0,sizeof(buffer));
         }
-      else if(strstr(packet.header,"oldh")!=NULL){
-        sendConfig();
-        ledOn3();
+      else if(strstr(packet.header,"oldho")!=NULL){
+        sendConfig(packet);
+        memset(buffer,0,sizeof(buffer));
         }
-     //printf("Buffer: %s BufferPointer: %i\n",buffer,bufferpointer);
-
+      else if(strstr(packet.header,"1leds")!=NULL  ){
+        ledOn1();
+        memset(buffer,0,sizeof(buffer));
+        }
+      else if(strstr(packet.header,"2leds")!=NULL){
+        ledOn2();
+        memset(buffer,0,sizeof(buffer));
+        }
+      else if(strstr(packet.header,"3leds")!=NULL){
+        ledOn3();
+        memset(buffer,0,sizeof(buffer));
+        }
       }
   
     ISR(USART0_RX_vect)
 {
+      if (bufferpointer>25)	{bufferpointer = 0;}
       char c=UDR0;
       buffer[bufferpointer]=c;
-      //printf("%i %s\n",bufferpointer,buffer);
+      //printf("%i %i\n",bufferpointer,strlen(buffer));
       bufferpointer+=1;
 
-    if (bufferpointer>=sizeof(buffer))	{bufferpointer = 0;}
+    
 }
 
 /****************************************************************
@@ -209,10 +208,15 @@ int main(void){
   printf_init();
   DDRA |= pin2;
   DDRA |= pin3;
+  ledOn1();
+  ledOn1();
+  bufferpointer=0;
+  //printf("%i %i",strlen(buffer), bufferpointer);
   while(1) {
    // printf("%i %s\n",bufferpointer,buffer);
-    strlcpy(package.header, buffer+sizeof(package.payload), sizeof(package.header));
-    strlcpy(package.payload, buffer, sizeof(package.payload));
+   memcpy(package.header, buffer+sizeof(package.payload), sizeof(package.header));
+    memcpy(package.payload, buffer, sizeof(package.payload));
+    //printf("%i %i",strlen(package.header),strlen(package.payload));
     gestorePacchettiIncoming(package);
     }
 }
