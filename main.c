@@ -26,7 +26,7 @@ char EEMEM nomeStanza3[20];
 uint16_t EEMEM tempoAcquisizione = 5;
 int bufferpointer=0;
 char buffer[25];
-
+uint16_t tempo;
 /*********************************************************************
  *                    Pacchetti                                      *
  * ******************************************************************/
@@ -203,6 +203,7 @@ int main(void){
   printf_init();
   DDRA |= pin2;
   DDRA |= pin3;
+  TCCR1B |= ((1 << CS10 ) | (1 << CS11 )) ;
   ledOn1();
   ledOn1();
   temp();
@@ -211,5 +212,10 @@ int main(void){
    memcpy(package.header, buffer+sizeof(package.payload), sizeof(package.header));
    memcpy(package.payload, buffer, sizeof(package.payload));
    gestorePacchettiIncoming(package);
+   tempo=eeprom_read_word(&tempoAcquisizione);
+      if ( TCNT1 >= 15624*tempo){ 
+        TCNT1 = 0;
+        temp();
+        }
     }
 }
