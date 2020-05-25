@@ -57,7 +57,7 @@ void UART_init(void){
   UCSR0B |= (1 << TXCIE0); 
   sei();
   }
-
+void printf_init(void);
 void ledOn1(void){
 const uint8_t pin1=(1<<7);
   DDRB |= pin1;
