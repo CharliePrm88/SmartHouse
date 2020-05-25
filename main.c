@@ -18,7 +18,7 @@
  *******************************************************************/
 const uint8_t pin2=(1<<0);
 const uint8_t pin3=(1<<2);
-float EEMEM temperatura;
+float temperatura;
 char EEMEM nomeCasa[20];
 char EEMEM nomeStanza1[20];
 char EEMEM nomeStanza2[20];
@@ -109,19 +109,18 @@ void temp(void){
     sensorVal =analogPortA0();
     voltage= (sensorVal/1024.0f)*5.0f;
     temperature=(voltage-0.5f)*100.0f;
-    eeprom_update_float( &temperatura , round(temperature * 10) / 10.0f);
-    /*
-    for(int i=0; i<4; i++) {
-        while ( !(UCSR0A & (1<<UDRE0)) );
-        UDR0 = tempc[i];
-        }*/
+    temperatura=(round(temperature * 10) / 10.0f);
     }
     
     void stampaTemperatura(void){
       char tempc[5];
-      float temp1 = eeprom_read_float(&temperatura);
-      dtostrf(temp1, 2, 1, tempc );
-      printf("%s\n",tempc); //va sostituito
+      dtostrf(temperatura, 2, 1, tempc );
+      for(int i=0; i<5; i++) {
+        while ( !(UCSR0A & (1<<UDRE0)) );
+        UDR0 = tempc[i];
+        _delay_ms(50);}
+        UDR0='\n';
+        bufferpointer=25;
       }
     
     /**************************************************************
@@ -178,6 +177,10 @@ void temp(void){
         ledOn3();
         memset(buffer,0,sizeof(buffer));
         }
+      else if(strstr(packet.header,"tempc")!=NULL){
+        stampaTemperatura();
+        memset(buffer,0,sizeof(buffer));
+        }
       }
   
     ISR(USART0_RX_vect)
@@ -202,6 +205,7 @@ int main(void){
   DDRA |= pin3;
   ledOn1();
   ledOn1();
+  temp();
   bufferpointer=0;
   while(1) {
    memcpy(package.header, buffer+sizeof(package.payload), sizeof(package.header));

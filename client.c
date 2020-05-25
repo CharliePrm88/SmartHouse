@@ -25,6 +25,8 @@ typedef struct pacchetto{
 	}pacchetto;
 
 pacchetto packet;
+char temperatura[5];
+
 	/******************************************************************
 	 * 				Funzioni di Supporto							  *
 	 * ***************************************************************/
@@ -104,7 +106,13 @@ casa richiediConfigurazioneIniziale(int fd, casa Casa){
 	}
 
 float richiediTemperatura(int fd){
-	//read(fd,&temperatura,1);
+	tcflush(fd, TCIFLUSH);
+	strcpy(packet.header, "tempc");
+	sprintf(packet.payload,"%-19s"," ");
+	inviaPacchetto(packet,fd);
+	for(int i=0; i<sizeof(temperatura); i++){
+	read(fd,temperatura+i,1);
+    }
 	}
 
 int main(int argc,char** argv){
@@ -154,11 +162,10 @@ int main(int argc,char** argv){
 	 * ************************************************************************/
 	 
 	char stanzaRichiesta[20]="c";
-	float temperatura;
 	pacchetto packet;
 	while(strcmp(stanzaRichiesta,"x")!=0){
-		//richiediTemperatura;
-		printf("Nome della casa: %s\nDigita \"x\" per uscire.\nDigita il nome di una stanza per accendere la luce.\nLa temperatura attuale è di %f. \nTi ricordo i nomi delle stanze:\n 1. %s \n 2. %s \n 3. %s\n", 
+		richiediTemperatura(fd);
+		printf("Nome della casa: %s\nDigita \"x\" per uscire.\nDigita il nome di una stanza per accendere la luce.\nLa temperatura attuale è di %s. \nTi ricordo i nomi delle stanze:\n 1. %s \n 2. %s \n 3. %s\n", 
 											Casa.nome,temperatura, Casa.led1,Casa.led2,Casa.led3);
 		scanf("%s",stanzaRichiesta);
 		gestoreLuci(Casa,stanzaRichiesta,fd);
