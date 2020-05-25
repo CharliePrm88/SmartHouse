@@ -10,7 +10,7 @@
 </ul>
 </br>
 Inoltre:
-<code>sudo apt-get install git arduino arduino-mk python3-flask</code>
+<code>sudo apt-get install git arduino arduino-mk</code>
 </br>
 <img src="static/sketch.jpg">
 </br>
@@ -21,8 +21,9 @@ Inoltre:
 <li>Clonare la repository in Raspberry pi</li>
 <li>make</li>
 <li>make main.hex</li>
+  <li>gcc -o NOMEESEGUIBILE client.c</li>
 <li>Eseguire su terminale:</br>
-<code>python server.py</code>
+<code>./NOMEESEGUIBILE</code>
 </li>
 <li>Collegarsi all'indirizzo indicato sul terminale con un browser per eseguire i comandi</li>
 </ol>
