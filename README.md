@@ -25,7 +25,6 @@ Inoltre:
 <li>Eseguire su terminale:</br>
 <code>./NOMEESEGUIBILE</code>
 </li>
-<li>Collegarsi all'indirizzo indicato sul terminale con un browser per eseguire i comandi</li>
 </ol>
 </br>
 Foto del prototipo
