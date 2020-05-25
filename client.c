@@ -7,7 +7,7 @@
 #include <errno.h>
 
 	/******************************************************
-	 * 				Pacchetti							  *
+	 * 				Pacchetti	      *					  *
 	 * ***************************************************/
 
 
@@ -28,7 +28,7 @@ pacchetto packet;
 char temperatura[5];
 
 	/******************************************************************
-	 * 				Funzioni di Supporto							  *
+	 * 				Funzioni di Supporto		  *					  *
 	 * ***************************************************************/
 void inviaPacchetto(pacchetto packet, int fd){
 	for(int i=0; i<sizeof(packet.payload); i++){
@@ -123,7 +123,7 @@ int main(int argc,char** argv){
 	
 	casa Casa;
 	/**************************************************
-	*  			SETTAGGIO DELLA PORTA SERIALE		  *
+	*  	SETTAGGIO DELLA PORTA SERIALE		  *
 	**************************************************/
 	const char *device = argv[1];
 	struct termios tty;
@@ -145,8 +145,8 @@ int main(int argc,char** argv){
 	tty.c_cc[VTIME] = 10;
 	if((tcsetattr(fd,TCSANOW,&tty)) != 0) perror("error setting attributes");
 	
-	/*************************************************************************
-	*				Configurazione iniziale									 *
+	/************************************************************************
+	*				Configurazione iniziale			*						 *
 	*************************************************************************/
 	printf("Vuoi fare la configurazione iniziale? y/n ");
 	char config;
@@ -158,7 +158,7 @@ int main(int argc,char** argv){
 	}
 	
 	/***************************************************************************
-	 * 							fino a che non invia "x"					   *
+	 * 	             fino a che non invia "x"				   *
 	 * ************************************************************************/
 	 
 	char stanzaRichiesta[20]="c";
