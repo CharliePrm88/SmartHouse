@@ -23,7 +23,7 @@ Inoltre:
 <li>make main.hex</li>
   <li>gcc -o NOMEESEGUIBILE client.c</li>
 <li>Eseguire su terminale:</br>
-<code>./NOMEESEGUIBILE</code>
+<code>./NOMEESEGUIBILE PercorsoArduino</code>
 </li>
 </ol>
 </br>
